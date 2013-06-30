@@ -93,11 +93,9 @@ class Component extends \CComponent {
 	}
 
 	/**
-	 * @param $event
-	 *
 	 * @return Component
 	 */
-	public function emit($event) {
+	public function emit() {
 		return call_user_func_array(array($this->getEventEmitter(), 'emit'), func_get_args());
 	}
 
