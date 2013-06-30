@@ -225,7 +225,7 @@ class Server extends Component {
 		$self = $this;
 		$connection->onClose(function () use ($socket, $self) {
 			$self->consoleLog('Emit close event in Socket #' . $socket->getId());
-			$socket->emit('close', $socket);
+			call_user_func(array($self->getEventEmitter(), 'emit'), 'close', $socket);
 			$socket->free();
 			$self->removeSocket($socket->getId());
 		});
