@@ -91,8 +91,8 @@ class Socket extends Component implements IClientEmitter {
 			$config = Package::getClient()->unwrap($data, $self);
 
 			if (is_array($config)) {
-				$self->emit('request', $config);
-				$self->emit($config['type'], $config);
+				call_user_func(array($self->getEventEmitter(), 'emit'), 'request', $config);
+				call_user_func(array($self->getEventEmitter(), 'emit'), $config['type'], $config);
 			}
 			Socket::clear($self);
 		});
