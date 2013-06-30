@@ -87,14 +87,14 @@ class Socket extends Component implements IClientEmitter {
 		$self = $this;
 
 		$connection->onData(function ($data) use ($self) {
-			self::setCurrent($self);
+			Socket::setCurrent($self);
 			$config = Package::getClient()->unwrap($data, $self);
 
 			if (is_array($config)) {
 				$self->emit('request', $config);
 				$self->emit($config['type'], $config);
 			}
-			self::clear($self);
+			Socket::clear($self);
 		});
 	}
 
