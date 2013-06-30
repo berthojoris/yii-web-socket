@@ -103,6 +103,15 @@ class Server extends Component {
 		return $this->_paths[$path];
 	}
 
+	/**
+	 * @param $callback
+	 *
+	 * @return Path
+	 */
+	public function onConnection($callback) {
+		return $this->of('/')->onConnection($callback);
+	}
+
 	public function listen() {
 		$this->consoleLog("Socket server listening on  " . $this->_config->getHost() . ':' . $this->_config->getPort());
 
