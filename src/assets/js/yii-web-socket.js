@@ -18,7 +18,7 @@ var YiiWebSocket = {
 			if (host.indexOf('ws://') == -1) {
 				host = 'ws://' + host;
 			}
-			host += path || '';
+			host += path || '/';
 
 			/**
 			 *
