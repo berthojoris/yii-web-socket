@@ -70,7 +70,7 @@ class Socket extends Component implements IClientEmitter {
 	 * Clear current socket
 	 */
 	public static function clear(Socket $socket) {
-		if (self::$_currentSocket->getId() == $socket->getId()) {
+		if (self::$_currentSocket && self::$_currentSocket->getId() == $socket->getId()) {
 			self::$_currentSocket = null;
 		}
 	}
