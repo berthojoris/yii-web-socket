@@ -62,8 +62,6 @@ class Server extends Component {
 
 		$self = $this;
 
-		$rootPath = new Path($this, '/');
-		$this->_paths[$rootPath->getPath()] = $rootPath;
 		$this->_server->on('connection', array($this, 'handleConnection'));
 	}
 
@@ -101,15 +99,6 @@ class Server extends Component {
 			$this->_paths[$path] = new Path($this, $path);
 		}
 		return $this->_paths[$path];
-	}
-
-	/**
-	 * @param $callback
-	 *
-	 * @return Path
-	 */
-	public function onConnection($callback) {
-		return $this->of('/')->onConnection($callback);
 	}
 
 	public function listen() {
