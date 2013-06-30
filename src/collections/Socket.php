@@ -8,10 +8,14 @@ namespace YiiWebSocket\Collections;
  * Time: 12:59 AM
  * To change this template use File | Settings | File Templates.
  *
+ * @method integer getCount()
+ *
  * @method Socket onExit($callback)
+ * @method Socket onAdd($callback)
+ * @method Socket onRemove($callback)
  *
  */
-class Socket extends \YiiWebSocket\Component {
+class Socket extends ACollection {
 
 	/**
 	 * @var \YiiWebSocket\Socket[]
@@ -19,14 +23,21 @@ class Socket extends \YiiWebSocket\Component {
 	protected $_sockets = array();
 
 	/**
+	 * @var int
+	 */
+	protected $_count = 0;
+
+	/**
 	 * @param \YiiWebSocket\Socket $socket
 	 */
 	public function add(\YiiWebSocket\Socket $socket) {
 		$self = $this;
 		$this->_sockets[$socket->getId()] = $socket;
+		$this->_count++;
 		$socket->onClose(function ($socket) use ($self) {
 			$self->remove($socket);
 		});
+		$this->emitAdd($socket);
 	}
 
 	/**
@@ -36,7 +47,8 @@ class Socket extends \YiiWebSocket\Component {
 	 */
 	public function remove(\YiiWebSocket\Socket $socket) {
 		if ($this->exists($socket)) {
-			parent::emit('exit', $socket);
+			$this->emitRemove($socket);
+			$this->_count--;
 			unset($this->_sockets[$socket->getId()]);
 		}
 		return $this;
@@ -52,12 +64,41 @@ class Socket extends \YiiWebSocket\Component {
 	}
 
 	/**
+	 * Emit event to all collection items without current socket
+	 *
 	 * @return void|\YiiWebSocket\Component
 	 */
 	public function emit() {
 		$json = \YiiWebSocket\Package::wrap(func_get_args());
+		$currentId = \YiiWebSocket\Socket::current()->getId();
+		foreach ($this->_sockets as $socket) {
+			if ($currentId != $socket->getId()) {
+				$socket->getConnection()->write($json);
+			}
+		}
+		return $this;
+	}
+
+	/**
+	 *
+	 * Emit event to all collection items with current socket
+	 *
+	 * @return Socket
+	 */
+	public function broadcast() {
+		$json = \YiiWebSocket\Package::wrap(func_get_args());
 		foreach ($this->_sockets as $socket) {
 			$socket->getConnection()->write($json);
 		}
+		return $this;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function delete() {
+		$this->_emit('delete', $this);
+		unset($this->_sockets);
+		unset($this->_eventEmitter);
 	}
 }
