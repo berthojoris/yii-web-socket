@@ -1,6 +1,13 @@
 <?php
 namespace YiiWebSocket;
 
+use YiiWebSocket\Connection\Connection;
+use YiiWebSocket\Connection\Headers;
+
+use YiiWebSocket\Extension\Path;
+use YiiWebSocket\Extension\Room;
+use YiiWebSocket\Extension\Data;
+
 /**
  * Created by JetBrains PhpStorm.
  * User: once
@@ -8,7 +15,7 @@ namespace YiiWebSocket;
  * Time: 10:36 AM
  * To change this template use File | Settings | File Templates.
  *
- * @method \YiiWebSocket\Connection\Connection getConnection()
+ * @method Connection getConnection()
  * @method Server getServer()
  * @method string getId()
  * @method Session getSession()
@@ -33,7 +40,7 @@ class Socket extends Component implements IClientEmitter {
 	protected $_id;
 
 	/**
-	 * @var \YiiWebSocket\Connection\Connection
+	 * @var Connection
 	 */
 	protected $_connection;
 
@@ -51,6 +58,16 @@ class Socket extends Component implements IClientEmitter {
 	 * @var Path
 	 */
 	protected $_path;
+
+	/**
+	 * @var Room
+	 */
+	protected $_rooms;
+
+	/**
+	 * @var Data
+	 */
+	protected $_data;
 
 	/**
 	 * @return Socket
@@ -76,8 +93,8 @@ class Socket extends Component implements IClientEmitter {
 	}
 
 	/**
-	 * @param Connection\Connection $connection
-	 * @param Server                $server
+	 * @param Connection $connection
+	 * @param Server     $server
 	 */
 	public function __construct(\YiiWebSocket\Connection\Connection $connection, Server $server) {
 		$this->_id = $connection->getId();
@@ -106,14 +123,14 @@ class Socket extends Component implements IClientEmitter {
 	}
 
 	/**
-	 * @return string
+	 * @return Path
 	 */
 	public function getPath() {
-		return $this->getHeaders()->getPath();
+		return $this->_path;
 	}
 
 	/**
-	 * @return \YiiWebSocket\Connection\Headers
+	 * @return Headers
 	 */
 	public function getHeaders() {
 		return $this->_connection->getHeaders();
@@ -130,13 +147,56 @@ class Socket extends Component implements IClientEmitter {
 	}
 
 	/**
-	 * @param $room
+	 * @param int|string $room
 	 *
 	 * @return Socket
 	 */
 	public function join($room) {
-		Room::getRoom($room, true)->join($this);
+		$room = Room::getRoom($room, true)->join($this);
+		$this->rooms()->add($room);
 		return $this;
+	}
+
+	/**
+	 * @param int|string $room
+	 */
+	public function leave($room) {
+		if ($room = $this->rooms()->get($room)) {
+			$room->leave($this);
+		}
+	}
+
+	/**
+	 * Return room by roomId
+	 *
+	 * @param $room
+	 *
+	 * @return Room|null
+	 */
+	public function room($room) {
+		return $this->rooms()->get($room);
+	}
+
+	/**
+	 * Return rooms with current socket
+	 *
+	 * @return Collections\Room
+	 */
+	public function rooms() {
+		if ($this->_rooms === null) {
+			$this->_rooms = new \YiiWebSocket\Collections\Room();
+		}
+		return $this->_rooms;
+	}
+
+	/**
+	 * @return Data
+	 */
+	public function data() {
+		if ($this->_data === null) {
+			$this->_data = new Data();
+		}
+		return $this->_data;
 	}
 
 	/**
@@ -171,6 +231,8 @@ class Socket extends Component implements IClientEmitter {
 		unset($this->_eventEmitter);
 		unset($this->_session);
 		unset($this->_path);
+		unset($this->_rooms);
+		unset($this->_data);
 	}
 
 	public function __destruct() {

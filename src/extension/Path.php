@@ -1,5 +1,5 @@
 <?php
-namespace YiiWebSocket;
+namespace YiiWebSocket\Extension;
 
 /**
  * Created by JetBrains PhpStorm.
@@ -9,12 +9,16 @@ namespace YiiWebSocket;
  * To change this template use File | Settings | File Templates.
  *
  * @method string getPath()
- * @method Server getServer()
- * @method \YiiWebSocket\Collections\Socket getSockets()
+ * @method \YiiWebSocket\Server getServer()
  *
  * @method Path onConnection($callback)
  */
-class Path extends Component {
+class Path extends \YiiWebSocket\Component {
+
+	/**
+	 * @var Path[]
+	 */
+	protected static $_paths = array();
 
 	/**
 	 * @var \YiiWebSocket\Collections\Socket
@@ -27,7 +31,7 @@ class Path extends Component {
 	protected $_path;
 
 	/**
-	 * @var Server
+	 * @var \YiiWebSocket\Server
 	 */
 	protected $_server;
 
@@ -42,17 +46,39 @@ class Path extends Component {
 	protected $_handler;
 
 	/**
-	 * @param Server $server
+	 * @param $path
+	 *
+	 * @return bool
+	 */
+	public static function exists($path) {
+		return array_key_exists($path, self::$_paths);
+	}
+
+	/**
+	 * @param $path
+	 *
+	 * @return null|Path
+	 */
+	public static function get($path) {
+		if (self::exists($path)) {
+			return self::$_paths[$path];
+		}
+		return null;
+	}
+
+	/**
+	 * @param \YiiWebSocket\Server $server
 	 * @param string $path
 	 */
-	public function __construct(Server $server, $path) {
+	public function __construct(\YiiWebSocket\Server $server, $path) {
 		$this->_server = $server;
 		$this->_path = $path;
 		$this->_sockets = new \YiiWebSocket\Collections\Socket();
+		self::$_paths[$this->getId()] = $this;
 
 		$self = $this;
-		$this->_server->onConnection(function (Socket $socket) use ($self) {
-			if ($self->getPath() == $socket->getPath()) {
+		$this->_server->onConnection(function (\YiiWebSocket\Socket $socket) use ($self) {
+			if ($self->getPath() == $socket->getHeaders()->getPath()) {
 				$socket->setPath($self);
 				$authorization = $self->getAuthorizationCallback();
 				if ($authorization !== null) {
@@ -62,7 +88,7 @@ class Path extends Component {
 							$socket->getConnection()->sendHttpResponse(401)->close();
 						} else {
 							$self->getSockets()->add($socket);
-							$socket->onClose(function (Socket $socket) use ($self) {
+							$socket->onClose(function (\YiiWebSocket\Socket $socket) use ($self) {
 								$self->getSockets()->remove($socket);
 							});
 							$self->emit('connection', $socket);
@@ -70,7 +96,7 @@ class Path extends Component {
 					});
 				} else {
 					$self->getSockets()->add($socket);
-					$socket->onClose(function (Socket $socket) use ($self) {
+					$socket->onClose(function (\YiiWebSocket\Socket $socket) use ($self) {
 						$self->consoleLog('Unset socket from path: ' . $self->getPath());
 						$self->getSockets()->remove($socket);
 					});
@@ -81,10 +107,17 @@ class Path extends Component {
 	}
 
 	/**
-	 * @param Event\Handler $handler
+	 * @return string
 	 */
-	public function setHandler(\YiiWebSocket\Event\Handler $handler) {
+	public function getId() {
+		return $this->_path;
+	}
 
+	/**
+	 * @return \YiiWebSocket\Collections\Socket
+	 */
+	public function getSockets() {
+		return $this->_sockets;
 	}
 
 	/**

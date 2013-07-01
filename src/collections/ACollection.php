@@ -12,6 +12,29 @@ namespace YiiWebSocket\Collections;
 abstract class ACollection extends \YiiWebSocket\Component implements \YiiWebSocket\IClientEmitter {
 
 	/**
+	 * @param $item
+	 */
+	abstract public function add($item);
+
+	/**
+	 * Remove item from current collection
+	 *
+	 * @param $item
+	 */
+	abstract public function remove($item);
+
+	/**
+	 * Check if collection has $item
+	 *
+	 * @param $item
+	 *
+	 * @return bool
+	 */
+	abstract public function exists($item);
+
+	/**
+	 * Delete collection
+	 *
 	 * @return mixed
 	 */
 	abstract public function delete();

@@ -3,6 +3,8 @@ namespace YiiWebSocket;
 
 require_once __DIR__ . DIRECTORY_SEPARATOR .  'vendor/autoload.php';
 
+use YiiWebSocket\Extension\Path;
+
 /**
  * Created by JetBrains PhpStorm.
  * User: once

@@ -1,5 +1,5 @@
 <?php
-namespace YiiWebSocket;
+namespace YiiWebSocket\Extension;
 
 /**
  * Created by JetBrains PhpStorm.
@@ -11,7 +11,7 @@ namespace YiiWebSocket;
  * @method string getId()
  *
  */
-class Room extends Component implements IClientEmitter {
+class Room extends \YiiWebSocket\Component implements \YiiWebSocket\IClientEmitter {
 
 	/**
 	 * @var Room[]
@@ -71,27 +71,34 @@ class Room extends Component implements IClientEmitter {
 		$this->_sockets = new \YiiWebSocket\Collections\Socket();
 
 		$self = $this;
-		$this->_sockets->onRemove(function (Socket $socket) use ($self) {
+		$this->_sockets->onRemove(function (\YiiWebSocket\Socket $socket) use ($self) {
 			$self->leave($socket);
 		});
 		self::$_rooms[$id] = $this;
 	}
 
 	/**
-	 * @param Socket $socket
+	 * @return \YiiWebSocket\Collections\Socket
+	 */
+	public function getSockets() {
+		return $this->_sockets;
+	}
+
+	/**
+	 * @param \YiiWebSocket\Socket $socket
 	 *
 	 * @return Room
 	 */
-	public function join(Socket $socket) {
+	public function join(\YiiWebSocket\Socket $socket) {
 		$this->_sockets->add($socket);
 		$this->_emit('join', $socket);
 		return $this;
 	}
 
 	/**
-	 * @param Socket $socket
+	 * @param \YiiWebSocket\Socket $socket
 	 */
-	public function leave(Socket $socket) {
+	public function leave(\YiiWebSocket\Socket $socket) {
 		if ($this->exists($socket)) {
 			$this->_emit('leave', $socket);
 			$this->_sockets->remove($socket);
@@ -99,11 +106,11 @@ class Room extends Component implements IClientEmitter {
 	}
 
 	/**
-	 * @param Socket $socket
+	 * @param \YiiWebSocket\Socket $socket
 	 *
 	 * @return bool
 	 */
-	public function exists(Socket $socket) {
+	public function exists(\YiiWebSocket\Socket $socket) {
 		return $this->_sockets->exists($socket);
 	}
 
@@ -120,6 +127,7 @@ class Room extends Component implements IClientEmitter {
 		$this->_sockets->delete();
 		unset($this->_sockets);
 		unset($this->_eventEmitter);
+		unset(self::$_rooms[$this->getId()]);
 	}
 
 	protected function _emit() {

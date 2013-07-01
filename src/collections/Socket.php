@@ -30,14 +30,16 @@ class Socket extends ACollection {
 	/**
 	 * @param \YiiWebSocket\Socket $socket
 	 */
-	public function add(\YiiWebSocket\Socket $socket) {
-		$self = $this;
-		$this->_sockets[$socket->getId()] = $socket;
-		$this->_count++;
-		$socket->onClose(function ($socket) use ($self) {
-			$self->remove($socket);
-		});
-		$this->emitAdd($socket);
+	public function add($socket) {
+		if (!$this->exists($socket)) {
+			$self = $this;
+			$this->_sockets[$socket->getId()] = $socket;
+			$this->_count++;
+			$socket->onClose(function ($socket) use ($self) {
+				$self->remove($socket);
+			});
+			$this->emitAdd($socket);
+		}
 	}
 
 	/**
@@ -45,7 +47,7 @@ class Socket extends ACollection {
 	 *
 	 * @return Socket
 	 */
-	public function remove(\YiiWebSocket\Socket $socket) {
+	public function remove($socket) {
 		if ($this->exists($socket)) {
 			$this->emitRemove($socket);
 			$this->_count--;
@@ -59,7 +61,7 @@ class Socket extends ACollection {
 	 *
 	 * @return bool
 	 */
-	public function exists(\YiiWebSocket\Socket $socket) {
+	public function exists($socket) {
 		return array_key_exists($socket->getId(), $this->_sockets);
 	}
 
@@ -91,6 +93,31 @@ class Socket extends ACollection {
 			$socket->getConnection()->write($json);
 		}
 		return $this;
+	}
+
+	/**
+	 * @param $callback
+	 */
+	public function each($callback) {
+		if (!is_callable($callback) && !($callback instanceof \Closure)) {
+			return false;
+		}
+		foreach ($this->_sockets as $socket) {
+			call_user_func($callback, $socket);
+		}
+		return true;
+	}
+
+	/**
+	 * Merge current collection with other collection
+	 *
+	 * @param Socket $collection
+	 */
+	public function mergeWith(Socket $collection) {
+		$self = $this;
+		$collection->each(function (\YiiWebSocket\Socket $socket) use ($self) {
+			$self->add($socket);
+		});
 	}
 
 	/**
