@@ -113,6 +113,8 @@ class Socket extends Component implements IClientEmitter {
 			}
 			Socket::clear($self);
 		});
+		$this->consoleLog('On socket create.');
+		$this->dumpMemory();
 	}
 
 	/**
