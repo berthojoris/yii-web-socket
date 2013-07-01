@@ -277,7 +277,10 @@ class WebSocketDataConverter extends ADataConverter {
 				break;
 		}
 
-		$this->connection->write($payload, 'close', false);
-		$this->connection->close();
+		$connection = Connection::getCurrent();
+		if ($connection) {
+			$connection->write($payload, 'close', false);
+			$connection->close();
+		}
 	}
 }

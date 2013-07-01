@@ -28,6 +28,11 @@ namespace YiiWebSocket\Connection;
 class Connection extends \YiiWebSocket\Component {
 
 	/**
+	 * @var Connection
+	 */
+	private static $_current;
+
+	/**
 	 * @var
 	 */
 	protected $_type;
@@ -77,6 +82,26 @@ class Connection extends \YiiWebSocket\Component {
 	 */
 	protected $_isWaitingForData = false;
 
+	/**
+	 * @param Connection $connection
+	 */
+	public static function setCurrent(Connection $connection) {
+		self::$_current = $connection;
+	}
+
+	/**
+	 * @return Connection
+	 */
+	public static function getCurrent() {
+		return self::$_current;
+	}
+
+	public static function removeCurrent(Connection $connection) {
+		if (self::$_current && $connection->getId() == self::$_current->getId()) {
+			self::$_current = null;
+		}
+	}
+
 	public function __construct(\React\Socket\Connection $connection, \YiiWebSocket\Server $server) {
 		$this->_server = $server;
 		$this->_connection = $connection;
@@ -85,15 +110,16 @@ class Connection extends \YiiWebSocket\Component {
 
 		$self = $this;
 		$this->_connection->on('data', function ($data) use ($self, $connection) {
+			Connection::setCurrent($self);
 			if ($self->isResolved()) {
 				if ($self->getHandshake()) {
 					if ($self->getIsWaitingForData() === true) {
 						$data = $self->getDataBuffer() . $data;
 						$self->setIsWaitingForData(false);
 					}
-					$self->getDataConverter()->connection = $self;
+//					$self->getDataConverter()->connection = $self;
 					$state = call_user_func(array($self->getDataConverter(), 'decode'), $data);
-					$self->getDataConverter()->connection = null;
+//					$self->getDataConverter()->connection = null;
 					if ($state == ADataConverter::RETURN_STATE_SUCCESS) {
 						$self->emit('data', $self->getDataConverter()->data, $self);
 					} else if ($state == ADataConverter::RETURN_STATE_WAITING_DATA) {
@@ -208,9 +234,9 @@ class Connection extends \YiiWebSocket\Component {
 	 * @return bool
 	 */
 	public function write($data) {
-		$this->getDataConverter()->connection = $this;
+//		$this->getDataConverter()->connection = $this;
 		$data = call_user_func_array(array($this->getDataConverter(), 'encode'), func_get_args());
-		$this->getDataConverter()->connection = null;
+//		$this->getDataConverter()->connection = null;
 		if ($data) {
 			return $this->_connection->write($data);
 		}
@@ -234,9 +260,9 @@ class Connection extends \YiiWebSocket\Component {
 	 */
 	public function forceWrite($data, $encode = true) {
 		if ($encode) {
-			$this->getDataConverter()->connection = $this;
+//			$this->getDataConverter()->connection = $this;
 			$data = call_user_func_array(array($this->getDataConverter(), 'encode'), array($data));
-			$this->getDataConverter()->connection = null;
+//			$this->getDataConverter()->connection = null;
 		}
 		if ($data) {
 			return fwrite($this->getStream(), $data);
@@ -284,6 +310,7 @@ class Connection extends \YiiWebSocket\Component {
 	public function free() {
 		$this->consoleLog('Free connection resources');
 		$this->emit('free', $this);
+		self::removeCurrent($this);
 		unset($this->_connection);
 		unset($this->_client);
 		unset($this->_server);
