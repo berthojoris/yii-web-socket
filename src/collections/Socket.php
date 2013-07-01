@@ -126,8 +126,10 @@ class Socket extends ACollection {
 	public function delete() {
 		$this->consoleLog('Delete: Collections\Socket');
 		$this->_emit('delete', $this);
-		unset($this->_sockets);
-		unset($this->_eventEmitter);
+		$this->_sockets = array();
+		$this->_eventEmitter = null;
+//		unset($this->_sockets);
+//		unset($this->_eventEmitter);
 	}
 
 	public function __destruct() {
