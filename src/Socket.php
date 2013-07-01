@@ -226,6 +226,7 @@ class Socket extends Component implements IClientEmitter {
 
 	public function free() {
 		$this->consoleLog('Free socket resources');
+		$this->dumpMemory();
 		$this->_emit('free', $this);
 		self::clear($this);
 		unset($this->_connection);
