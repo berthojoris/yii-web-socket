@@ -11,6 +11,7 @@ use YiiWebSocket\Extension\Path;
  * Date: 6/14/13
  * Time: 10:42 AM
  * To change this template use File | Settings | File Templates.
+ * @method \React\EventLoop\LoopInterface getLoop()
  *
  * @method Server onConnection($callback)
  * @method Server onClose($callback)
@@ -27,7 +28,7 @@ class Server extends Component {
 	/**
 	 * @var \React\EventLoop\LoopInterface
 	 */
-	private $_loop;
+	protected $_loop;
 
 	/**
 	 * @var Config
