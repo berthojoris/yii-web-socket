@@ -226,7 +226,10 @@ class WebSocketDataConverter extends ADataConverter {
 				break;
 
 			case 'ping':
-				$this->connection->writeRawData($this->encode($decodedData['payload'], 'pong', false));
+				$connection = Connection::getCurrent();
+				if ($connection) {
+					$connection->writeRawData($this->encode($decodedData['payload'], 'pong', false));
+				}
 				return self::RETURN_STATE_NO_ACTION;
 				break;
 
