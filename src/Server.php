@@ -200,6 +200,7 @@ class Server extends Component {
 		$this->consoleLog("", 'New connection');
 		$this->dumpMemory();
 		$this->consoleLog('');
+		$connection->bufferSize = $this->_config->getPackageSize();
 		$connection = new \YiiWebSocket\Connection\Connection($connection, $this);
 		$this->_connections[$connection->getId()] = $connection;
 		$self = $this;
