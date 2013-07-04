@@ -10,7 +10,6 @@ namespace YiiWebSocket;
  *
  * @method Config setHost(string $host)
  * @method Config setPort(int $port)
- * @method Config setPackageSize(int $size)
  *
  * @method string   getHost()
  * @method int      getPort()
@@ -93,6 +92,19 @@ class Config {
 	 */
 	public function getPackageSize() {
 		return $this->_packageSize;
+	}
+
+	/**
+	 * @param int $size
+	 *
+	 * @return Config
+	 */
+	public function setPackageSize($size) {
+		if (!is_numeric($size)) {
+			return $this;
+		}
+		$this->_packageSize = (int) $size;
+		return $this;
 	}
 
 	/**
