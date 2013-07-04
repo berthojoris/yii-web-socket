@@ -96,6 +96,8 @@ class Socket extends ACollection {
 	}
 
 	/**
+	 * Call $callback for every socket in collection
+	 *
 	 * @param $callback
 	 */
 	public function each($callback) {
@@ -106,6 +108,26 @@ class Socket extends ACollection {
 			call_user_func($callback, $socket);
 		}
 		return true;
+	}
+
+	/**
+	 * Filter current collection using callback function
+	 *
+	 * @param \Closure|callable $callback
+	 *
+	 * @return Socket
+	 */
+	public function filter($callback) {
+		$collection = new Socket();
+		if (!is_callable($callback) && !($callback instanceof \Closure)) {
+			return $collection;
+		}
+		foreach ($this->_sockets as $socket) {
+			if (call_user_func($callback, $socket)) {
+				$collection->add($socket);
+			}
+		}
+		return $collection;
 	}
 
 	/**
