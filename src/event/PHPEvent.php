@@ -54,7 +54,9 @@ class PHPEvent {
 		stream_set_blocking($this->_socket, 0);
 
 		$args = func_get_args();
-		$this->send($this->createHeaders());
+		if ($this->send($this->createHeaders()) === false) {
+			return false;
+		}
 		$sent = $this->send($this->createPackage(array_shift($args), $args));
 
 		fclose($this->_socket);
@@ -65,7 +67,10 @@ class PHPEvent {
 	 * @param string $package
 	 */
 	private function send($package) {
-		return fwrite($this->_socket, $package);
+		if (!is_resource($this->_socket)) {
+			return false;
+		}
+		return @fwrite($this->_socket, $package);
 	}
 
 	/**
