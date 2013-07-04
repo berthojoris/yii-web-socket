@@ -70,7 +70,14 @@ class PHPEvent {
 		if (!is_resource($this->_socket)) {
 			return false;
 		}
-		return @fwrite($this->_socket, $package);
+		$len = strlen($package);
+		for ($written = 0; $written < $len; $written += $fwrite) {
+			$fwrite = @fwrite($this->_socket, substr($package, $written));
+			if ($fwrite === false) {
+				return $written;
+			}
+		}
+		return $written;
 	}
 
 	/**

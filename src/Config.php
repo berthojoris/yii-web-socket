@@ -10,6 +10,7 @@ namespace YiiWebSocket;
  *
  * @method Config setHost(string $host)
  * @method Config setPort(int $port)
+ * @method Config setPackageSize(int $size)
  *
  * @method string   getHost()
  * @method int      getPort()
@@ -37,6 +38,11 @@ class Config {
 	 * @var int
 	 */
 	protected $_port = 3002;
+
+	/**
+	 * @var int
+	 */
+	protected $_packageSize = 4096;
 
 	/**
 	 * @var \YiiWebSocket\Connection\AResolver
@@ -80,6 +86,13 @@ class Config {
 	 */
 	public function hasOrigin($domain) {
 		return in_array($domain, $this->_origins);
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getPackageSize() {
+		return $this->_packageSize;
 	}
 
 	/**
