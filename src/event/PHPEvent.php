@@ -73,7 +73,7 @@ class PHPEvent {
 		$len = strlen($package);
 		for ($written = 0; $written < $len; $written += $fwrite) {
 			$fwrite = @fwrite($this->_socket, substr($package, $written));
-			if ($fwrite === false) {
+			if ($fwrite === false || $fwrite === 0) {
 				return $written;
 			}
 		}
