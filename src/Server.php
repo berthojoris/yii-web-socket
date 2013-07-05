@@ -70,6 +70,8 @@ class Server extends Component {
 		$self = $this;
 
 		$this->_server->on('connection', array($this, 'handleConnection'));
+
+		Process::setServer($this);
 	}
 
 	/**
