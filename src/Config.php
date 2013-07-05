@@ -18,6 +18,12 @@ namespace YiiWebSocket;
  */
 class Config {
 
+	const DEBUG_LEVEL_ALL = 32;
+	const DEBUG_LEVEL_ERROR =8;
+	const DEBUG_LEVEL_WARN = 4;
+	const DEBUG_LEVEL_INFO = 2;
+	const DEBUG_LEVEL_MESSAGE = 1;
+
 	/**
 	 * @var bool
 	 */
@@ -26,7 +32,7 @@ class Config {
 	/**
 	 * @var int
 	 */
-	public $debugLevel = 3;
+	public $debugLevel = self::DEBUG_LEVEL_ALL;
 
 	/**
 	 * @var string

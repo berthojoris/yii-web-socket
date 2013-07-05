@@ -234,9 +234,7 @@ class Connection extends \YiiWebSocket\Component {
 	 * @return bool
 	 */
 	public function write($data) {
-//		$this->getDataConverter()->connection = $this;
 		$data = call_user_func_array(array($this->getDataConverter(), 'encode'), func_get_args());
-//		$this->getDataConverter()->connection = null;
 		if ($data) {
 			return $this->_connection->write($data);
 		}
@@ -260,9 +258,7 @@ class Connection extends \YiiWebSocket\Component {
 	 */
 	public function forceWrite($data, $encode = true) {
 		if ($encode) {
-//			$this->getDataConverter()->connection = $this;
 			$data = call_user_func_array(array($this->getDataConverter(), 'encode'), array($data));
-//			$this->getDataConverter()->connection = null;
 		}
 		if ($data) {
 			return fwrite($this->getStream(), $data);

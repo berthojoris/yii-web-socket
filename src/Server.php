@@ -60,6 +60,10 @@ class Server extends Component {
 	 */
 	public function __construct(Config $config) {
 		$this->_config = $config;
+
+		$this->console()->debug = $config->debug;
+		$this->console()->level = $config->debugLevel;
+
 		$this->_loop = \React\EventLoop\Factory::create();
 		$this->_server = new \React\Socket\Server($this->_loop);
 

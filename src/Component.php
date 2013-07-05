@@ -14,6 +14,11 @@ namespace YiiWebSocket;
 class Component extends \CComponent {
 
 	/**
+	 * @var \YiiWebSocket\Helper\Console
+	 */
+	protected static $_console;
+
+	/**
 	 * @var bool
 	 */
 	protected $_canSetProtected = true;
@@ -101,6 +106,13 @@ class Component extends \CComponent {
 
 	public function dumpMemory() {
 		$this->consoleLog(sprintf('Memory usage: %0.2f', memory_get_usage() / 1024));
+	}
+
+	/**
+	 * @return Helper\Console
+	 */
+	public function console() {
+		return \YiiWebSocket\Helper\Console::getInstance();
 	}
 
 	/**

@@ -10,8 +10,11 @@ namespace YiiWebSocket;
  */
 class Process extends Component {
 
+	/**
+	 * @return Socket
+	 */
 	public static function getCurrentSocket() {
-
+		return Socket::current();
 	}
 
 	public static function setTimeout($callback, $delay = 100) {
