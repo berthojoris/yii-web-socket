@@ -102,6 +102,12 @@ class Console {
 	 * @return bool
 	 */
 	protected function isLevelEnabled($level) {
+		if (!$this->debug) {
+			return false;
+		}
+		if ($this->level & Config::DEBUG_LEVEL_ALL) {
+			return true;
+		}
 		return $this->debug && ($this->level & $level);
 	}
 }
