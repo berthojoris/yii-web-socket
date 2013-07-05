@@ -32,7 +32,7 @@ class Config {
 	/**
 	 * @var int
 	 */
-	public $debugLevel = 3;
+	public $debugLevel = self::DEBUG_LEVEL_ALL;
 
 	/**
 	 * @var string

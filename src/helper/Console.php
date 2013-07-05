@@ -1,5 +1,8 @@
 <?php
 namespace YiiWebSocket\Helper;
+
+use YiiWebSocket\Config;
+
 /**
  * Created by JetBrains PhpStorm.
  * User: once
@@ -13,6 +16,16 @@ class Console {
 	 * @var Console
 	 */
 	private static $_instance;
+
+	/**
+	 * @var bool
+	 */
+	public $debug;
+
+	/**
+	 * @var int
+	 */
+	public $level;
 
 	/**
 	 * @return Console
@@ -29,9 +42,6 @@ class Console {
 	 */
 	private $_consoleColor;
 
-	public $debug = true;
-	public $level = 3;
-
 	public function __construct() {
 		$this->_consoleColor = new Colors();
 	}
@@ -47,7 +57,7 @@ class Console {
 	 * @param $message
 	 */
 	public function error($message) {
-		if (!$this->debug || $this->level < 3) {
+		if (!$this->isLevelEnabled(Config::DEBUG_LEVEL_ERROR)) {
 			return;
 		}
 		echo $this->_consoleColor->getColoredString('ERROR: ', 'red');
@@ -58,25 +68,41 @@ class Console {
 	 * @param $message
 	 */
 	public function warn($message) {
-		if (!$this->debug || $this->level < 2) {
+		if (!$this->isLevelEnabled(Config::DEBUG_LEVEL_WARN)) {
 			return;
 		}
 		echo $this->_consoleColor->getColoredString('WARN: ', 'yellow');
 		echo $message . "\n";
 	}
 
+	/**
+	 * @param $message
+	 */
 	public function info($message) {
-
+		if (!$this->isLevelEnabled(Config::DEBUG_LEVEL_INFO)) {
+			return;
+		}
+		echo $this->_consoleColor->getColoredString('INFO: ', 'light_cyan');
+		echo $message . "\n";
 	}
 
 	/**
 	 * @param $message
 	 */
 	public function log($message) {
-		if (!$this->debug || $this->level < 1) {
+		if (!$this->isLevelEnabled(Config::DEBUG_LEVEL_MESSAGE)) {
 			return;
 		}
 		echo $message . "\n";
+	}
+
+	/**
+	 * @param $level
+	 *
+	 * @return bool
+	 */
+	protected function isLevelEnabled($level) {
+		return $this->debug && ($this->level & $level);
 	}
 }
 
