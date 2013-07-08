@@ -15,7 +15,6 @@ use YiiWebSocket\Extension\Path;
  *
  * @method Server onConnection($callback)
  * @method Server onClose($callback)
- * @method Config getConfig()
  *
  */
 class Server extends Component {
@@ -87,17 +86,6 @@ class Server extends Component {
 		return $this->_dataConverters[$type];
 	}
 
-
-	/**
-	 * @param $callback
-	 *
-	 * @return Server
-	 */
-	public function authorization($callback) {
-		$this->of('/')->authorization($callback);
-		return $this;
-	}
-
 	/**
 	 * @param string $path
 	 *
@@ -112,31 +100,17 @@ class Server extends Component {
 
 	public function listen() {
 		$this->consoleLog("Socket server listening on  " . $this->_config->getHost() . ':' . $this->_config->getPort());
+		$this->dumpMemory();
 
 		$this->_server->listen($this->_config->getPort(), $this->_config->getHost());
-		$this->dumpMemory();
 		$this->_loop->run();
 	}
 
 	/**
-	 * @param string $origin
-	 *
-	 * @return bool
+	 * @return Config
 	 */
-	public function checkOrigin($origin) {
-		$domain = str_replace('http://', '', $origin);
-		$domain = str_replace('https://', '', $domain);
-		$domain = str_replace('www.', '', $domain);
-		$domain = str_replace('/', '', $domain);
-
-		return $this->_config->hasOrigin($domain);
-	}
-
-	/**
-	 * @return Connection\AResolver|Connection\Resolver
-	 */
-	public function getConnectionResolver() {
-		return $this->_config->getConnectionResolver();
+	public function getConfig() {
+		return $this->_config;
 	}
 
 	/**
@@ -203,9 +177,8 @@ class Server extends Component {
 	 * @param \React\Socket\Connection $connection
 	 */
 	public function createConnection(\React\Socket\Connection $connection) {
-		$this->consoleLog("", 'New connection');
+		$this->console()->info('New connection');
 		$this->dumpMemory();
-		$this->consoleLog('');
 		$connection->bufferSize = $this->_config->getPackageSize();
 		$connection = new \YiiWebSocket\Connection\Connection($connection, $this);
 		$this->_connections[$connection->getId()] = $connection;

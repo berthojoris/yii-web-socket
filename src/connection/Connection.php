@@ -1,6 +1,8 @@
 <?php
 namespace YiiWebSocket\Connection;
 
+use YiiWebSocket\Process;
+
 /**
  * Created by JetBrains PhpStorm.
  * User: once
@@ -205,7 +207,7 @@ class Connection extends \YiiWebSocket\Component {
 		if ($this->isResolved()) {
 			return;
 		}
-		$handshakeHandler = $this->_server->getConnectionResolver()->resolve($data, $this);
+		$handshakeHandler = Process::getServer()->getConfig()->getConnectionResolver()->resolve($data, $this);
 		if ($handshakeHandler === null) {
 			echo 'Handshake handler is null';
 			$this->close();

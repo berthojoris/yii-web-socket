@@ -105,7 +105,7 @@ class Component extends \CComponent {
 	}
 
 	public function dumpMemory() {
-		$this->consoleLog(sprintf('Memory usage: %0.2f', memory_get_usage() / 1024));
+		$this->console()->info(sprintf('Memory usage: %0.2f', memory_get_usage() / 1024));
 	}
 
 	/**
