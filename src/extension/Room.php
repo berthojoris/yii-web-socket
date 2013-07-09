@@ -1,6 +1,10 @@
 <?php
 namespace YiiWebSocket\Extension;
 
+use YiiWebSocket\IIdentified;
+use YiiWebSocket\IClientEmitter;
+use YiiWebSocket\IFrameEmitter;
+
 /**
  * Created by JetBrains PhpStorm.
  * User: once
@@ -8,10 +12,8 @@ namespace YiiWebSocket\Extension;
  * Time: 9:58 PM
  * To change this template use File | Settings | File Templates.
  *
- * @method string getId()
- *
  */
-class Room extends \YiiWebSocket\Component implements \YiiWebSocket\IClientEmitter {
+class Room extends \YiiWebSocket\Component implements IClientEmitter, IIdentified, IFrameEmitter {
 
 	/**
 	 * @var Room[]
@@ -78,6 +80,13 @@ class Room extends \YiiWebSocket\Component implements \YiiWebSocket\IClientEmitt
 	}
 
 	/**
+	 * @return mixed
+	 */
+	public function getId() {
+		return $this->_id;
+	}
+
+	/**
 	 * @return \YiiWebSocket\Collections\Socket
 	 */
 	public function getSockets() {
@@ -121,6 +130,25 @@ class Room extends \YiiWebSocket\Component implements \YiiWebSocket\IClientEmitt
 	public function broadcast() {
 		return call_user_func_array(array($this->_sockets, 'broadcast'), func_get_args());
 	}
+
+	/**
+	 * @param \YiiWebSocket\Package\Frame $frame
+	 *
+	 * @return mixed
+	 */
+	public function emitFrame(\YiiWebSocket\Package\Frame $frame) {
+		$this->_sockets->emitFrame($frame);
+	}
+
+	/**
+	 * @param \YiiWebSocket\Package\Frame $frame
+	 *
+	 * @return mixed
+	 */
+	public function broadcastFrame(\YiiWebSocket\Package\Frame $frame) {
+		$this->_sockets->broadcastFrame($frame);
+	}
+
 
 	public function delete() {
 		$this->_emit('delete', $this);

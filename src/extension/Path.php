@@ -1,6 +1,10 @@
 <?php
 namespace YiiWebSocket\Extension;
 
+use YiiWebSocket\Package\Frame;
+use YiiWebSocket\IClientEmitter;
+use YiiWebSocket\IFrameEmitter;
+
 /**
  * Created by JetBrains PhpStorm.
  * User: once
@@ -13,7 +17,7 @@ namespace YiiWebSocket\Extension;
  *
  * @method Path onConnection($callback)
  */
-class Path extends \YiiWebSocket\Component {
+class Path extends \YiiWebSocket\Component implements IClientEmitter, IFrameEmitter {
 
 	/**
 	 * @var Path[]
@@ -130,5 +134,38 @@ class Path extends \YiiWebSocket\Component {
 			$this->_authorizationCallback = $callback;
 		}
 		return $this;
+	}
+
+	public function emit() {
+		$frame = new Frame(func_get_args());
+		$this->emitFrame($frame);
+	}
+
+	/**
+	 * Send to all clients
+	 *
+	 * @return mixed
+	 */
+	public function broadcast() {
+		$frame = new Frame(func_get_args());
+		$this->broadcastFrame($frame);
+	}
+
+	/**
+	 * @param \YiiWebSocket\Package\Frame $frame
+	 *
+	 * @return mixed
+	 */
+	public function emitFrame(\YiiWebSocket\Package\Frame $frame) {
+		$this->_sockets->emitFrame($frame);
+	}
+
+	/**
+	 * @param \YiiWebSocket\Package\Frame $frame
+	 *
+	 * @return mixed
+	 */
+	public function broadcastFrame(\YiiWebSocket\Package\Frame $frame) {
+		$this->_sockets->broadcastFrame($frame);
 	}
 }

@@ -15,9 +15,8 @@ use YiiWebSocket\Extension\Data;
  * Time: 10:36 AM
  * To change this template use File | Settings | File Templates.
  *
- * @method Connection getConnection()
+ * @method \YiiWebSocket\Connection\Connection getConnection()
  * @method Server getServer()
- * @method string getId()
  * @method Session getSession()
  * @method Socket setPath(Path $path)
  *
@@ -27,7 +26,7 @@ use YiiWebSocket\Extension\Data;
  * @method Socket onCallback($callback)
  * @method Socket onRequest($callback)
  */
-class Socket extends Component implements IClientEmitter {
+class Socket extends Component implements IClientEmitter, IIdentified, IFrameEmitter {
 
 	/**
 	 * @var Socket
@@ -115,6 +114,13 @@ class Socket extends Component implements IClientEmitter {
 		});
 		$this->consoleLog('On socket create.');
 		$this->dumpMemory();
+	}
+
+	/**
+	 * @return int|string
+	 */
+	public function getId() {
+		return $this->_id;
 	}
 
 	/**
@@ -215,6 +221,24 @@ class Socket extends Component implements IClientEmitter {
 	 */
 	public function broadcast() {
 		call_user_func_array(array($this->_path->getSockets(), 'emit'), func_get_args());
+	}
+
+	/**
+	 * @param \YiiWebSocket\Package\Frame $frame
+	 *
+	 * @return mixed
+	 */
+	public function emitFrame(\YiiWebSocket\Package\Frame $frame) {
+		$this->_connection->write($frame->getFrame());
+	}
+
+	/**
+	 * @param \YiiWebSocket\Package\Frame $frame
+	 *
+	 * @return mixed
+	 */
+	public function broadcastFrame(\YiiWebSocket\Package\Frame $frame) {
+		$this->_path->broadcastFrame($frame);
 	}
 
 	/**
