@@ -141,7 +141,7 @@ class Connection extends \YiiWebSocket\Component {
 			$self->emit('error', $error, $self);
 		});
 		$this->_connection->on('end', function () use ($self) {
-			$self->console()->log('Close connection #' . $self->getId());
+			$self->console()->info('Close connection #' . $self->getId());
 			$self->emit('close');
 			$self->free();
 			unset($self);

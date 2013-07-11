@@ -161,10 +161,10 @@ class Server extends Component {
 	 * @param \React\Socket\Connection $connection
 	 */
 	public function createConnection(\React\Socket\Connection $connection) {
-		$this->console()->info('New connection');
-		$this->dumpMemory();
 		$connection->bufferSize = $this->_config->getPackageSize();
 		$connection = new \YiiWebSocket\Connection\Connection($connection, $this);
+		$this->console()->info('New connection #' . $connection->getId());
+		$this->dumpMemory();
 //		$this->_connections[$connection->getId()] = $connection;
 		$self = $this;
 		$connection->onConnect(function () use ($connection, $self) {
@@ -194,7 +194,7 @@ class Server extends Component {
 //		$this->_sockets[$socket->getId()] = $socket;
 		$self = $this;
 		$connection->onClose(function () use ($socket, $self) {
-			$self->consoleLog('Emit close event in Socket #' . $socket->getId());
+			$self->console()->info('Emit close event in Socket #' . $socket->getId());
 			call_user_func(array($socket->getEventEmitter(), 'emit'), 'close', $socket);
 			$socket->free();
 			unset($socket);
