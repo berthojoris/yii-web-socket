@@ -38,7 +38,8 @@ class Socket extends ACollection {
 	 */
 	public function emit() {
 		$json = \YiiWebSocket\Package::wrap(func_get_args());
-		$currentId = \YiiWebSocket\Socket::current()->getId();
+		$currentSocket = \YiiWebSocket\Socket::current();
+		$currentId = $currentSocket ? $currentSocket->getId() : false;
 		/** @var \YiiWebSocket\Socket $socket */
 		foreach ($this->_collection as $socket) {
 			if ($currentId != $socket->getId()) {
