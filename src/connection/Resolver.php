@@ -11,6 +11,27 @@ namespace YiiWebSocket\Connection;
 class Resolver extends AResolver {
 
 	/**
+	 * @var \SplPriorityQueue
+	 */
+	protected $_connectionTypes;
+
+	public function __construct() {
+		$this->_connectionTypes = new \SplPriorityQueue();
+	}
+
+	/**
+	 * @param Type $type
+	 *
+	 * @return Resolver
+	 */
+	public function setConnectionType(Type $type) {
+		if ($type->isValid()) {
+			$this->_connectionTypes->insert($type, - $type->getPriority());
+		}
+		return $this;
+	}
+
+	/**
 	 * @param            $data
 	 * @param Connection $connection
 	 *
@@ -20,35 +41,20 @@ class Resolver extends AResolver {
 		if ($data) {
 			$headers = new Headers($data, $connection);
 			if ($headers->isValid()) {
-				if ($this->isWebSocket($headers)) {
-					$handler = $this->getHandshakeHandler(self::CONNECTION_TYPE_WEB_SOCKET);
-					$connection->setType(self::CONNECTION_TYPE_WEB_SOCKET);
-					return $handler;
-				} else if ($this->isPHPEventSocket($headers)) {
-					$handler = $this->getHandshakeHandler(self::CONNECTION_TYPE_PHP_EVENT);
-					$connection->setType(self::CONNECTION_TYPE_PHP_EVENT);
-					return $handler;
+				$this->_connectionTypes->top();
+				$resolved = false;
+				/** @var Type $type */
+				foreach ($this->_connectionTypes as $type) {
+					if ($type->getConnectionDeterminer()->determine($headers)) {
+						$connection->setType($type);
+						$connection->setHeaders($headers);
+						$resolved = true;
+						break;
+					}
 				}
+				return $resolved;
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * @param Headers $headers
-	 *
-	 * @return bool
-	 */
-	protected function isWebSocket(Headers $headers) {
-		return $headers->getHeader('Sec-WebSocket-Version') || $headers->getHeader('Sec-WebSocket-Key');
-	}
-
-	/**
-	 * @param Headers $headers
-	 *
-	 * @return string|null
-	 */
-	protected function isPHPEventSocket(Headers $headers) {
-		return $headers->getHeader('PHP-Event') == 'yes';
 	}
 }

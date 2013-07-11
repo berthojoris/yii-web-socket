@@ -1,6 +1,8 @@
 <?php
 namespace YiiWebSocket;
 
+use YiiWebSocket\Connection\Connection;
+
 /**
  * Created by JetBrains PhpStorm.
  * User: once
@@ -36,7 +38,7 @@ class Client extends Component {
 	/**
 	 * @param \YiiWebSocket\Connection\Connection $connection
 	 */
-	public function __construct(\YiiWebSocket\Connection\Connection $connection) {
+	public function __construct(Connection $connection) {
 		$this->_socket = $connection->getStream();
 		$socketName = stream_socket_get_name($this->_socket, true);
 		$tmp = explode(':', $socketName);
@@ -53,7 +55,7 @@ class Client extends Component {
 	}
 
 	public function __destruct() {
-		$this->consoleLog('Destruct: Client');
+		$this->console()->log('Destruct: Client');
 		unset($this->_socket);
 		parent::__destruct();
 	}

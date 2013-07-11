@@ -14,7 +14,6 @@ use YiiWebSocket\Process;
  * @property resource   $socket
  * @property bool       $handshake
  *
- * @method const getType()
  * @method \YiiWebSocket\Client getClient()
  * @method \YiiWebSocket\Connection\Headers getHeaders()
  * @method \YiiWebSocket\Server getServer()
@@ -35,7 +34,7 @@ class Connection extends \YiiWebSocket\Component {
 	private static $_current;
 
 	/**
-	 * @var
+	 * @var Type
 	 */
 	protected $_type;
 
@@ -119,16 +118,14 @@ class Connection extends \YiiWebSocket\Component {
 						$data = $self->getDataBuffer() . $data;
 						$self->setIsWaitingForData(false);
 					}
-//					$self->getDataConverter()->connection = $self;
-					$state = call_user_func(array($self->getDataConverter(), 'decode'), $data);
-//					$self->getDataConverter()->connection = null;
+					$state = call_user_func(array($self->getType()->getDataConverter(), 'decode'), $data);
 					if ($state == ADataConverter::RETURN_STATE_SUCCESS) {
-						$self->emit('data', $self->getDataConverter()->data, $self);
+						$self->emit('data', $self->getType()->getDataConverter()->data, $self);
 					} else if ($state == ADataConverter::RETURN_STATE_WAITING_DATA) {
 						//  wait untill all data will be transfered
 						$self->setIsWaitingForData(true);
 						$self->setDataBuffer($data);
-						echo 'Waiting for data...';
+						$self->console()->info('Waiting for data...');
 					} else if ($state == ADataConverter::RETURN_STATE_NO_ACTION) {
 						//  seems like all actions was done
 					}
@@ -141,9 +138,10 @@ class Connection extends \YiiWebSocket\Component {
 		});
 		$this->_connection->on('error', function ($error) use ($self) {
 			$self->console()->error($error);
+			$self->emit('error', $error, $self);
 		});
 		$this->_connection->on('end', function () use ($self) {
-			$self->consoleLog('Close connection #' . $self->getId());
+			$self->console()->info('Close connection #' . $self->getId());
 			$self->emit('close');
 			$self->free();
 			unset($self);
@@ -155,6 +153,22 @@ class Connection extends \YiiWebSocket\Component {
 	 */
 	public function getId() {
 		return $this->_client->id;
+	}
+
+	/**
+	 * @param Type $type
+	 */
+	public function setType(Type $type) {
+		if ($this->_type === null) {
+			$this->_type = $type;
+		}
+	}
+
+	/**
+	 * @return Type
+	 */
+	public function getType() {
+		return $this->_type;
 	}
 
 	/**
@@ -182,13 +196,6 @@ class Connection extends \YiiWebSocket\Component {
 	}
 
 	/**
-	 * @return ADataConverter
-	 */
-	public function getDataConverter() {
-		return $this->_server->getDataConverter($this);
-	}
-
-	/**
 	 * @param Headers $headers
 	 *
 	 * @return Connection
@@ -207,17 +214,11 @@ class Connection extends \YiiWebSocket\Component {
 		if ($this->isResolved()) {
 			return;
 		}
-		$handshakeHandler = Process::getServer()->getConfig()->getConnectionResolver()->resolve($data, $this);
-		if ($handshakeHandler === null) {
-			echo 'Handshake handler is null';
-			$this->close();
-		} else {
+		if (Process::getServer()->getConfig()->getConnectionResolver()->resolve($data, $this)) {
 			$this->_resolved = true;
-			$handshakeHandler->connection = $this;
-			$handshakeHandler->headers = $this->getHeaders();
-			$this->_handshake = $handshakeHandler->doHandshake();
-			unset($handshakeHandler->connection);
-			unset($handshakeHandler->headers);
+			$handshakeHandler = $this->getType()->getHandshake();
+			$this->_handshake = $handshakeHandler->prepare($this)->doHandshake();
+			$handshakeHandler->clean();
 			if ($this->_handshake) {
 				$this->emit('connect', $this);
 				$data = $this->_headers->getData();
@@ -225,8 +226,13 @@ class Connection extends \YiiWebSocket\Component {
 					$this->_connection->emit('data', array($data, $this->_connection));
 				}
 			} else {
-				echo 'Handshake error';
+				$this->console()->error('Handshake error: send status 401 and close connection');
+				$this->sendHttpResponse(401)->close();
 			}
+		} else {
+			$this->console()->error('Could not resolve connection: send status 400 and close connection');
+			$this->sendHttpResponse();
+			$this->close();
 		}
 	}
 
@@ -236,7 +242,7 @@ class Connection extends \YiiWebSocket\Component {
 	 * @return bool
 	 */
 	public function write($data) {
-		$data = call_user_func_array(array($this->getDataConverter(), 'encode'), func_get_args());
+		$data = call_user_func_array(array($this->getType()->getDataConverter(), 'encode'), func_get_args());
 		if ($data) {
 			return $this->_connection->write($data);
 		}
@@ -260,7 +266,7 @@ class Connection extends \YiiWebSocket\Component {
 	 */
 	public function forceWrite($data, $encode = true) {
 		if ($encode) {
-			$data = call_user_func_array(array($this->getDataConverter(), 'encode'), array($data));
+			$data = call_user_func_array(array($this->getType()->getDataConverter(), 'encode'), array($data));
 		}
 		if ($data) {
 			return fwrite($this->getStream(), $data);
@@ -310,6 +316,7 @@ class Connection extends \YiiWebSocket\Component {
 		$this->emit('free', $this);
 		self::removeCurrent($this);
 		unset($this->_connection);
+		unset($this->_type);
 		unset($this->_client);
 		unset($this->_server);
 		unset($this->_eventEmitter);

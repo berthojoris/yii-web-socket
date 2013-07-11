@@ -13,13 +13,6 @@ use YiiWebSocket\Helper\Util;
 class PHPEventHandshake extends AHandshake {
 
 	/**
-	 * @return mixed
-	 */
-	public function getType() {
-		return Resolver::CONNECTION_TYPE_PHP_EVENT;
-	}
-
-	/**
 	 * @param Headers    $headers
 	 * @param Connection $connection
 	 *

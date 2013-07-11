@@ -12,6 +12,10 @@ use YiiWebSocket\IFrameEmitter;
  * Time: 9:58 PM
  * To change this template use File | Settings | File Templates.
  *
+ * @method Room onJoin(callable $callback)
+ * @method Room onLeave(callable $callback)
+ * @method Room onDelete(callable $callback)
+ *
  */
 class Room extends \YiiWebSocket\Component implements IClientEmitter, IIdentified, IFrameEmitter {
 
@@ -29,6 +33,11 @@ class Room extends \YiiWebSocket\Component implements IClientEmitter, IIdentifie
 	 * @var \YiiWebSocket\Collections\Socket
 	 */
 	private $_sockets;
+
+	/**
+	 * @var Data
+	 */
+	protected $_data;
 
 	/**
 	 * @param string|int $id
@@ -149,12 +158,22 @@ class Room extends \YiiWebSocket\Component implements IClientEmitter, IIdentifie
 		$this->_sockets->broadcastFrame($frame);
 	}
 
+	/**
+	 * @return Data
+	 */
+	public function data() {
+		if ($this->_data === null) {
+			$this->_data = new Data();
+		}
+		return $this->_data;
+	}
 
 	public function delete() {
 		$this->_emit('delete', $this);
 		$this->_sockets->delete();
 		unset($this->_sockets);
 		unset($this->_eventEmitter);
+		unset($this->_data);
 		unset(self::$_rooms[$this->getId()]);
 	}
 

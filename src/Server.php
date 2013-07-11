@@ -37,22 +37,17 @@ class Server extends Component {
 	/**
 	 * @var \YiiWebSocket\Connection\Connection[]
 	 */
-	protected $_connections = array();
+//	protected $_connections = array();
 
 	/**
 	 * @var Socket[]
 	 */
-	protected $_sockets = array();
-
-	/**
-	 * @var Path[]
-	 */
-	protected $_paths = array();
+//	protected $_sockets = array();
 
 	/**
 	 * @var \YiiWebSocket\Connection\ADataConverter
 	 */
-	protected $_dataConverters = array();
+//	protected $_dataConverters = array();
 
 	/**
 	 * @param Config $config
@@ -66,24 +61,9 @@ class Server extends Component {
 		$this->_loop = \React\EventLoop\Factory::create();
 		$this->_server = new \React\Socket\Server($this->_loop);
 
-		$self = $this;
-
 		$this->_server->on('connection', array($this, 'handleConnection'));
 
 		Process::setServer($this);
-	}
-
-	/**
-	 * @param Connection\Connection $connection
-	 *
-	 * @return \YiiWebSocket\Connection\ADataConverter
-	 */
-	public function getDataConverter(\YiiWebSocket\Connection\Connection $connection) {
-		$type = $connection->getType();
-		if (!array_key_exists($type, $this->_dataConverters)) {
-			$this->_dataConverters[$type] = \YiiWebSocket\Connection\ADataConverter::create($type);
-		}
-		return $this->_dataConverters[$type];
 	}
 
 	/**
@@ -92,14 +72,15 @@ class Server extends Component {
 	 * @return Path
 	 */
 	public function of($path) {
-		if (!array_key_exists($path, $this->_paths)) {
-			$this->_paths[$path] = new Path($this, $path);
+		$_path = Path::get($path);
+		if ($_path === null) {
+			$_path = new Path($this, $path);
 		}
-		return $this->_paths[$path];
+		return $_path;
 	}
 
 	public function listen() {
-		$this->consoleLog("Socket server listening on  " . $this->_config->getHost() . ':' . $this->_config->getPort());
+		$this->console()->info("Socket server listening on  " . $this->_config->getHost() . ':' . $this->_config->getPort());
 		$this->dumpMemory();
 
 		$this->_server->listen($this->_config->getPort(), $this->_config->getHost());
@@ -146,54 +127,60 @@ class Server extends Component {
 	/**
 	 * @param $id
 	 */
-	public function removeConnection($id) {
-		if ($this->hasConnection($id)) {
-			unset($this->_connections[$id]);
-		}
-	}
+//	public function removeConnection($id) {
+//		if ($this->hasConnection($id)) {
+//			unset($this->_connections[$id]);
+//		}
+//	}
 
 	/**
 	 * @param $id
 	 */
-	public function removeSocket($id) {
-		if ($this->hasSocket($id)) {
-			unset($this->_sockets[$id]);
-		}
-	}
+//	public function removeSocket($id) {
+//		if ($this->hasSocket($id)) {
+//			unset($this->_sockets[$id]);
+//		}
+//	}
 
 	/**
 	 * @param \React\Socket\Connection $connection
 	 */
 	public function handleConnection(\React\Socket\Connection $connection) {
-		$id = (int) $connection->stream;
+//		$id = (int) $connection->stream;
+		$this->createConnection($connection);
+		/*
 		if ($this->hasConnection($id)) {
 			$connection = $this->getConnection($id);
 		} else {
 			$connection = $this->createConnection($connection);
 		}
+		*/
 	}
 
 	/**
 	 * @param \React\Socket\Connection $connection
 	 */
 	public function createConnection(\React\Socket\Connection $connection) {
-		$this->console()->info('New connection');
-		$this->dumpMemory();
 		$connection->bufferSize = $this->_config->getPackageSize();
 		$connection = new \YiiWebSocket\Connection\Connection($connection, $this);
-		$this->_connections[$connection->getId()] = $connection;
+		$this->console()->info('New connection #' . $connection->getId());
+		$this->dumpMemory();
+//		$this->_connections[$connection->getId()] = $connection;
 		$self = $this;
 		$connection->onConnect(function () use ($connection, $self) {
 
 			$socket = $self->createSocket($connection);
 			$self->emit('connection', $socket);
 
+			/*
 			$connection->onClose(function () use ($connection, $self) {
 				$self->consoleLog('Remove connection');
 				$self->emit('close', $connection);
-				$self->removeConnection($connection->getId());
+//				$self->removeConnection($connection->getId());
+				unset($connection);
 				$self->dumpMemory();
 			});
+			*/
 		});
 	}
 
@@ -204,13 +191,14 @@ class Server extends Component {
 	 */
 	public function createSocket(\YiiWebSocket\Connection\Connection $connection) {
 		$socket = new Socket($connection, $this);
-		$this->_sockets[$socket->getId()] = $socket;
+//		$this->_sockets[$socket->getId()] = $socket;
 		$self = $this;
 		$connection->onClose(function () use ($socket, $self) {
-			$self->consoleLog('Emit close event in Socket #' . $socket->getId());
+			$self->console()->info('Emit close event in Socket #' . $socket->getId());
 			call_user_func(array($socket->getEventEmitter(), 'emit'), 'close', $socket);
 			$socket->free();
-			$self->removeSocket($socket->getId());
+			unset($socket);
+//			$self->removeSocket($socket->getId());
 		});
 		return $socket;
 	}

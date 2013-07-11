@@ -15,33 +15,6 @@ abstract class ADataConverter extends \YiiWebSocket\Component {
 	const RETURN_STATE_NO_ACTION = 'no_actions';
 
 	/**
-	 * @param $type
-	 *
-	 * @return ADataConverter
-	 */
-	public static function create($type) {
-		switch ($type) {
-
-			case Resolver::CONNECTION_TYPE_WEB_SOCKET:
-				return new WebSocketDataConverter();
-				break;
-
-			case Resolver::CONNECTION_TYPE_PHP_EVENT:
-				return new PHPEventDataConverter();
-				break;
-
-			default:
-				return new DefaultDataConverter();
-				break;
-		}
-	}
-
-	/**
-	 * @var Connection
-	 */
-	public $connection;
-
-	/**
 	 * @var mixed
 	 */
 	public $data;
