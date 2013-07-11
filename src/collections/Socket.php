@@ -71,7 +71,8 @@ class Socket extends ACollection {
 	 */
 	public function emitFrame(\YiiWebSocket\Package\Frame $frame) {
 		$json = $frame->getFrame();
-		$currentId = \YiiWebSocket\Socket::current()->getId();
+		$currentSocket = \YiiWebSocket\Socket::current();
+		$currentId = $currentSocket ? $currentSocket->getId() : false;
 		/** @var \YiiWebSocket\Socket $socket */
 		foreach ($this->_collection as $socket) {
 			if ($currentId != $socket->getId()) {
