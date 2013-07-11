@@ -13,13 +13,6 @@ use YiiWebSocket\Helper\Util;
 class WebSocketHandshake extends AHandshake {
 
 	/**
-	 * @return mixed
-	 */
-	public function getType() {
-		return Resolver::CONNECTION_TYPE_WEB_SOCKET;
-	}
-
-	/**
 	 * @return bool|mixed
 	 */
 	public function doHandshake() {

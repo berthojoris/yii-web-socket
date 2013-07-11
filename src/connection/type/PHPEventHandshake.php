@@ -1,6 +1,8 @@
 <?php
 namespace YiiWebSocket\Connection;
 
+use YiiWebSocket\Helper\Util;
+
 /**
  * Created by JetBrains PhpStorm.
  * User: once
@@ -9,13 +11,6 @@ namespace YiiWebSocket\Connection;
  * To change this template use File | Settings | File Templates.
  */
 class PHPEventHandshake extends AHandshake {
-
-	/**
-	 * @return mixed
-	 */
-	public function getType() {
-		return Resolver::CONNECTION_TYPE_PHP_EVENT;
-	}
 
 	/**
 	 * @param Headers    $headers
@@ -45,7 +40,7 @@ class PHPEventHandshake extends AHandshake {
 	 */
 	private function checkOrigin() {
 		$origin = $this->headers->getHeader('Origin');
-		if (!$origin || !$this->connection->getServer()->checkOrigin($origin)) {
+		if (!$origin || !Util::checkOrigin($origin)) {
 			$this->connection->sendHttpResponse(401);
 			return false;
 		}

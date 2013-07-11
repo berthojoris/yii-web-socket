@@ -13,17 +13,32 @@ abstract class AHandshake {
 	/**
 	 * @var Headers
 	 */
-	public $headers;
+	protected $headers;
 
 	/**
 	 * @var Connection
 	 */
-	public $connection;
+	protected $connection;
 
 	/**
-	 * @return mixed
+	 * @param Connection $connection
+	 *
+	 * @return AHandshake
 	 */
-	abstract public function getType();
+	final public function prepare(Connection $connection) {
+		$this->connection = $connection;
+		$this->headers = $connection->getHeaders();
+		return $this;
+	}
+
+	/**
+	 * Remove links on connection and headers objects
+	 */
+	final public function clean() {
+		//  remove object links
+		$this->connection = null;
+		$this->headers = null;
+	}
 
 	/**
 	 * @return bool
