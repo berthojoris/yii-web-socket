@@ -139,8 +139,8 @@ class Connection extends \YiiWebSocket\Component {
 				$self->resolve($data);
 			}
 		});
-		$this->_connection->on('error', function () {
-			echo 'Error';
+		$this->_connection->on('error', function ($error) use ($self) {
+			$self->console()->error($error);
 		});
 		$this->_connection->on('end', function () use ($self) {
 			$self->consoleLog('Close connection #' . $self->getId());
