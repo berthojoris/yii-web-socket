@@ -217,6 +217,7 @@ class Connection extends \YiiWebSocket\Component {
 		if (Process::getServer()->getConfig()->getConnectionResolver()->resolve($data, $this)) {
 			$this->_resolved = true;
 			$handshakeHandler = $this->getType()->getHandshake();
+			echo 1;
 			$this->_handshake = $handshakeHandler->prepare($this)->doHandshake();
 			$handshakeHandler->clean();
 			if ($this->_handshake) {
