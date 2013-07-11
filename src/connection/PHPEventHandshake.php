@@ -1,6 +1,8 @@
 <?php
 namespace YiiWebSocket\Connection;
 
+use YiiWebSocket\Helper\Util;
+
 /**
  * Created by JetBrains PhpStorm.
  * User: once
@@ -45,7 +47,7 @@ class PHPEventHandshake extends AHandshake {
 	 */
 	private function checkOrigin() {
 		$origin = $this->headers->getHeader('Origin');
-		if (!$origin || !$this->connection->getServer()->checkOrigin($origin)) {
+		if (!$origin || !Util::checkOrigin($origin)) {
 			$this->connection->sendHttpResponse(401);
 			return false;
 		}
