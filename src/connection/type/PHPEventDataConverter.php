@@ -1,5 +1,8 @@
 <?php
-namespace YiiWebSocket\Connection;
+namespace YiiWebSocket\Connection\Type;
+
+use YiiWebSocket\Connection\DefaultDataConverter;
+
 /**
  * Created by JetBrains PhpStorm.
  * User: once

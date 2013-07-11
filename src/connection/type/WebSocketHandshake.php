@@ -1,6 +1,7 @@
 <?php
-namespace YiiWebSocket\Connection;
+namespace YiiWebSocket\Connection\Type;
 
+use YiiWebSocket\Connection\AHandshake;
 use YiiWebSocket\Helper\Util;
 
 /**

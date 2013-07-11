@@ -1,7 +1,10 @@
 <?php
-namespace YiiWebSocket\Connection;
+namespace YiiWebSocket\Connection\Type;
 
 use YiiWebSocket\Helper\Util;
+use YiiWebSocket\Connection\AHandshake;
+use YiiWebSocket\Connection\Connection;
+use YiiWebSocket\Connection\Headers;
 
 /**
  * Created by JetBrains PhpStorm.

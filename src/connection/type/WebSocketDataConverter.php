@@ -1,5 +1,8 @@
 <?php
-namespace YiiWebSocket\Connection;
+namespace YiiWebSocket\Connection\Type;
+
+use YiiWebSocket\Connection\ADataConverter;
+use YiiWebSocket\Connection\Connection;
 
 /**
  * Created by JetBrains PhpStorm.
@@ -111,9 +114,6 @@ class WebSocketDataConverter extends ADataConverter {
 	}
 
 	/**
-	 * @param            $data
-	 * @param Connection $connection
-	 *
 	 * @return array|bool
 	 */
 	public function decode() {
@@ -209,7 +209,10 @@ class WebSocketDataConverter extends ADataConverter {
 		}
 
 		if (!isset($decodedData['type'])) {
-			$this->connection->sendHttpResponse(401)->close();
+			$connection = Connection::getCurrent();
+			if ($connection) {
+				$connection->sendHttpResponse(401)->close();
+			}
 			return self::RETURN_STATE_NO_ACTION;
 		}
 		switch ($decodedData['type']) {
