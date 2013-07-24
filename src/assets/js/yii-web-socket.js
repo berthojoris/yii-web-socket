@@ -287,10 +287,28 @@ var YiiWebSocket = {
 			};
 
 			var isReconnecting = false;
-			var reconnectTime = 100;
+
+			this.isReconnecting = function () {
+				return isReconnecting;
+			};
+
+			var reconnectInterval = 100;
+			var interval = reconnectInterval;
+			var reconnectFactor = 10;
+
+			this.setReconnectInterval = function (interval) {
+				reconnectInterval = interval;
+				interval = reconnectInterval;
+			};
+
+			this.setReconnectFactor = function (factor) {
+				reconnectFactor = factor;
+			};
+
+			var recreateTimeoutId = null;
 
 			var recreateConnection = function () {
-				setTimeout(function () {
+				recreateTimeoutId = setTimeout(function () {
 					self.emit('reconnect');
 					var sock = new WebSocket(host);
 					sock.onopen = function () {
@@ -298,15 +316,15 @@ var YiiWebSocket = {
 							sock.onopen = socket.onopen;
 							socket = sock;
 							socket.onopen();
-							reconnectTime = 100;
+							interval = reconnectInterval;
 						}
 					};
 					sock.onclose = socket.onclose;
 					sock.onmessage = socket.onmessage;
-					if (reconnectTime <= 10000) {
-						reconnectTime *= 10;
+					if (interval <= 10000) {
+						interval *= reconnectFactor;
 					}
-				}, reconnectTime);
+				}, interval);
 			};
 		};
 	}
