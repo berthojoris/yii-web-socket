@@ -272,7 +272,7 @@ var YiiWebSocket = {
 			 * Handle close
 			 */
 			socket.onclose = function () {
-				emitLocalEvent('close', self);
+				emitLocalEvent('close', self, isNormalClose);
 				if (isNormalClose === null) {
 					recreateConnection();
 				}
