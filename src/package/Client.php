@@ -20,7 +20,7 @@ class Client {
 	 */
 	public function unwrap($json, \YiiWebSocket\Socket $socket = null) {
 		$config = json_decode($json, true);
-		if ($config === false) {
+		if ($config === false || $config === null) {
 			$socket->getConnection()->sendHttpResponse();
 			return false;
 		}
